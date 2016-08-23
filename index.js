@@ -4,7 +4,7 @@ var url = require('url');
 var request = require('request');
 var cheerio = require('cheerio');
 var async = require('async');
-var validator = require('validator');
+var validUrl = require('valid-url');
 
 //Lets define a port we want to listen to
 const PORT=8080; 
@@ -22,11 +22,12 @@ function handleRequest(req, res){
     var parsedResults = [];
 
     function httpGet(url, callback) {
-      console.log("validator.isURL(url)",validator.isURL(url));
-      if(validator.isURL(url) === true) {
+      //console.log("validator.isURL(url)",validUrl.isUri(url));
+      if(validUrl.isUri(url)) {
         request(url,
           function(err, res, body) {
-            if (res.statusCode == 200) { 
+            console.log(res);
+            if (!err && res.statusCode == 200) { 
               var $ = cheerio.load(body);
               var title = $("title").text();
               // Push title into parsedResults array
@@ -34,7 +35,10 @@ function handleRequest(req, res){
                 'url':url,
                 'title':title
               });            
-              callback(err)
+              callback(null);
+            }
+            else{
+              callback(err);
             }
           }
         );
